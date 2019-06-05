@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------
 // <copyright file="UndoableBase.cs" company="Marimer LLC">
 //     Copyright (c) Marimer LLC. All rights reserved.
-//     Website: http://www.lhotka.net/cslanet/
+//     Website: https://cslanet.com
 // </copyright>
 // <summary>Implements n-level undo capabilities as</summary>
 //-----------------------------------------------------------------------
@@ -482,7 +482,7 @@ namespace Csla.Core
       using (MemoryStream buffer = new MemoryStream())
       {
         ISerializationFormatter formatter =
-          SerializationFormatterFactory.GetFormatter();
+          SerializationFormatterFactory.GetNativeFormatter();
         formatter.Serialize(buffer, state);
         _stateStack.Push(buffer.ToArray());
       }
@@ -535,7 +535,7 @@ namespace Csla.Core
         {
           buffer.Position = 0;
           ISerializationFormatter formatter =
-            SerializationFormatterFactory.GetFormatter();
+            SerializationFormatterFactory.GetNativeFormatter();
           state = (MobileDictionary<string, object>)formatter.Deserialize(buffer);
         }
 

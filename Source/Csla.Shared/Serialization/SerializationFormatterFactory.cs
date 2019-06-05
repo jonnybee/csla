@@ -1,7 +1,7 @@
 //-----------------------------------------------------------------------
 // <copyright file="SerializationFormatterFactory.cs" company="Marimer LLC">
 //     Copyright (c) Marimer LLC. All rights reserved.
-//     Website: http://www.lhotka.net/cslanet/
+//     Website: https://cslanet.com
 // </copyright>
 // <summary>Factory used to create the appropriate</summary>
 //-----------------------------------------------------------------------
@@ -36,6 +36,25 @@ namespace Csla.Serialization
       }
       else
         return new Csla.Serialization.Mobile.MobileFormatter();
+    }
+
+    /// <summary>
+    /// <para>
+    /// Creates a serialization formatter that is compatible with the platform on which the current process is running.
+    /// </para>
+    /// <para>
+    /// This method will ignore the settings in <see cref="ApplicationContext.SerializationFormatter"/> and
+    /// <see cref="ConfigurationManager.AppSettings"/> and should only be used for operations for which data will be
+    /// serialized and deserialized in the same process without crossing a data portal boundary (i.e. n-level undo).
+    /// </para>
+    /// </summary>
+    internal static ISerializationFormatter GetNativeFormatter()
+    {
+#if (ANDROID || IOS) || NETFX_CORE || NETSTANDARD2_0
+      return new Csla.Serialization.Mobile.MobileFormatter();
+#else
+      return new NetDataContractSerializerWrapper();
+#endif
     }
   }
 }

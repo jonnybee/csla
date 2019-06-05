@@ -9,12 +9,38 @@ namespace Csla.Analyzers.Extensions
 {
   internal static class ITypeSymbolExtensions
   {
+    internal static bool IsObjectFactory(this ITypeSymbol @this)
+    {
+      return @this != null &&
+        ((@this.Name == CslaMemberConstants.Types.ObjectFactoryBase &&
+          @this.ContainingAssembly.Name == CslaMemberConstants.AssemblyName) ||
+          @this.BaseType.IsObjectFactory());
+    }
+
     internal static bool IsBusinessBase(this ITypeSymbol @this)
     {
       return @this != null &&
         ((@this.Name == CslaMemberConstants.Types.BusinessBase &&
           @this.ContainingAssembly.Name == CslaMemberConstants.AssemblyName) ||
           @this.BaseType.IsBusinessBase());
+    }
+
+    internal static bool IsPrimitive(this ITypeSymbol @this)
+    {
+      var specialType = @this.SpecialType;
+      return specialType == SpecialType.System_Boolean ||
+        specialType == SpecialType.System_Char ||
+        specialType == SpecialType.System_String ||
+        specialType == SpecialType.System_Byte ||
+        specialType == SpecialType.System_SByte ||
+        specialType == SpecialType.System_Int16 ||
+        specialType == SpecialType.System_UInt16 ||
+        specialType == SpecialType.System_Int32 ||
+        specialType == SpecialType.System_UInt32 ||
+        specialType == SpecialType.System_Int64 ||
+        specialType == SpecialType.System_UInt64 ||
+        specialType == SpecialType.System_Single ||
+        specialType == SpecialType.System_Double;
     }
 
     internal static bool IsIPropertyInfo(this ITypeSymbol @this)
@@ -34,27 +60,6 @@ namespace Csla.Analyzers.Extensions
           @this.Name == CslaMemberConstants.Types.BusinessBindingListBase) &&
           @this.ContainingAssembly.Name == CslaMemberConstants.AssemblyName) ||
           @this.BaseType.IsEditableStereotype());
-    }
-
-    internal static bool IsSerializable(this ITypeSymbol @this)
-    {
-      // Either the symbol is a delegate or enum
-      // or it has the [SerializableAttribute]
-      return @this != null && (
-        @this.TypeKind == TypeKind.Enum || @this.TypeKind == TypeKind.Delegate ||
-        @this.GetAttributes().Any(
-          _ => _.AttributeClass.Name == CslaMemberConstants.SerializableAttribute) ||
-        @this.HasSerializableFlag());
-    }
-
-    private static bool HasSerializableFlag(this ITypeSymbol @this)
-    {
-      var flagsProperty = @this.GetAllProperties()
-        .SingleOrDefault(_ => _.Name == "Flags" && _.PropertyType == typeof(TypeAttributes) &&
-          _.CanRead);
-
-      return flagsProperty != null && 
-        ((TypeAttributes)flagsProperty?.GetValue(@this)).HasFlag(TypeAttributes.Serializable);
     }
 
     private static ImmutableArray<PropertyInfo> GetAllProperties(this ITypeSymbol @this)
